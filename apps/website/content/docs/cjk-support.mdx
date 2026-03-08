@@ -3,21 +3,23 @@ title: CJK Language Support
 description: Full support for Chinese, Japanese, and Korean text with proper emphasis formatting.
 ---
 
-Streamdown includes built-in support for CJK (Chinese, Japanese, Korean) languages, ensuring that emphasis markers like bold and italic work correctly with ideographic punctuation. This is particularly important for AI-generated content, where language models naturally place emphasis markers around phrases that include or end with punctuation.
+Streamdown includes built-in support for CJK (Chinese, Japanese, Korean) languages, ensuring that emphasis markers like bold and italic work correctly in CJK text containing punctuation, brackets, and mixed-script content. This is particularly important for AI-generated content, where language models naturally place emphasis markers around phrases that include punctuation or mix CJK and non-CJK text.
 
 ## The Problem
 
-The CommonMark/GFM specification has a [limitation](https://github.com/commonmark/commonmark-spec/issues/650) where emphasis markers (`**` or `*`) adjacent to ideographic punctuation marks occasionally fail to be recognized. This causes formatting to break in CJK text:
+The CommonMark/GFM specification has a [limitation](https://github.com/commonmark/commonmark-spec/issues/650) where emphasis markers (`**` or `*`) in CJK text containing punctuation, brackets, or mixed-script content can occasionally fail to be recognized. This causes formatting to break in CJK text:
 
 ```markdown
 **この文は太字になりません（This won't be bolded）。**この文のせいで（It is due to this sentence）。
+
+这个**`inline code`**也不会变成粗体（This **`inline code`** also won't be bolded）。
 ```
 
-Without CJK-friendly parsing, the text above would render as plain text instead of bold because the closing `**` appears next to the Japanese period.
+Without CJK-friendly parsing, the text above would render as plain text instead of bold because the emphasis delimiters appear next to punctuation or wrap mixed-script content in ways CommonMark does not handle well in CJK text.
 
 ## The Solution
 
-Streamdown uses the [remark-cjk-friendly](https://www.npmjs.com/package/remark-cjk-friendly) and [remark-cjk-friendly-gfm-strikethrough](https://www.npmjs.com/package/remark-cjk-friendly-gfm-strikethrough) plugins to handle CJK text properly. This plugin implements an improved parsing approach that correctly recognizes emphasis markers adjacent to ideographic punctuation.
+Streamdown uses the [remark-cjk-friendly](https://www.npmjs.com/package/remark-cjk-friendly) and [remark-cjk-friendly-gfm-strikethrough](https://www.npmjs.com/package/remark-cjk-friendly-gfm-strikethrough) plugins to handle CJK text properly. These plugins implement an improved parsing approach that correctly recognizes emphasis markers in CJK text, including cases with punctuation, brackets, and mixed-script spans.
 
 ## Supported Features
 
@@ -95,22 +97,19 @@ The plugin handles all common ideographic punctuation marks:
 
 Language models generate markdown naturally, often placing emphasis markers around phrases that include punctuation. Without CJK-friendly parsing, AI-generated content in Chinese, Japanese, or Korean would have broken formatting.
 
+{/* https://github.com/prettier/prettier/pull/18533 */}
+
+{/* prettier-ignore */}
 <dl>
   <dt>❌ Without CJK support:</dt>
   <dd>
-    - The model writes:{" "}
-    <span lang="ja">`**この用語（読み方など）**について説明します。`</span>- The
-    user sees: <span lang="ja">
-      \*\*この用語（読み方など）\*\*について説明します。
-    </span> (not bold!)
+    - The model writes: <span lang="ja">`**この用語（読み方など）**について説明します。`</span>
+    - The user sees: <span lang="ja">\*\*この用語（読み方など）\*\*について説明します。</span> (not bold!)
   </dd>
   <dt>✅ With CJK support:</dt>
   <dd>
-    - The model writes:{" "}
-    <span lang="ja">`**この用語（読み方など）**について説明します。`</span>- The
-    user sees: <span lang="ja">
-      <strong>この用語（読み方など）</strong>について説明します。
-    </span> (properly bolded!)
+    - The model writes: <span lang="ja">`**この用語（読み方など）**について説明します。`</span>
+    - The user sees: <span lang="ja"><strong>この用語（読み方など）</strong>について説明します。</span> (properly bolded!)
   </dd>
 </dl>
 
